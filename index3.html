@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>Zapiski za študente fizike</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #dee8ff;
+}
+
+/* HEADER */
+header {
+    text-align: center;
+    padding: 35px 20px 10px;
+    background: #1e293b;
+    color: white;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+header p {
+    color: #666;
+    margin-top: 6px;
+}
+
+#search {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 18px;
+    padding: 12px 14px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+header input {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.subtitle {
+    font-size: 16px;
+    font-weight: normal;
+    margin-top: 8px;
+    opacity: 0.85;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 1250px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* YEAR TITLE */
+.year-title {
+    margin-top: 40px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 6px;
+}
+
+/* GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 20px;
+}
+
+
+/* CARD */
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.card hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 10px 0;
+}
+
+.card ul {
+    padding-left: 18px;
+    margin: 0;
+}
+
+.card li {
+    margin-bottom: 6px;
+}
+
+.card a {
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.card a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    background: #1e293b;
+    color: #cbd5e1;
+    margin-top: 60px;
+    padding: 35px 20px;
+    text-align: center;
+}
+
+.footer-content p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.footer-content a {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.footer-content a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* MOBILE */
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>📚 Zapiski za študente fizike</h1>
+        <div class="subtitle">
+        Zbrani moji zapiski iz predavanj, vaj in nekaj zapiskov za izpite za FMF študente
+        </div>
+    <input type="text" id="search" placeholder="🔍 Išči predmet..." />
+</header>
+
+<div class="container" id="content"></div>
+
+<script>
+const driveData = {
+
+    "1. LETNIK": {
+        "Astronomska opazovanja": {
+            "Vaje": "1O8_ZUHQfPQAd_SwoHiClhu5nS050vswu"
+        },
+        "Kako stvari delujejo": {
+            "Predavanja": "11i_RubO5VFeVt85d44jv1vqzBR508_GS"
+        },
+        "Klasična fizika": {
+            "List s formulami": "1XDllkeWjalfvUqlUQfcurogZx5fv3Xe5",
+            "Predavanja": "1luJ6pcomKW1dO_kzyF1YoFAhyE2SHqii",
+            "Vaje": "1_2sxIWyY7d6K7-6YhsXSKqaMQJzZp-No"
+        },
+        "Matematika 1": {
+            "Vaje": "1Gz1608Kkhiq6tT9ll24VOOQC2xQJ9wWB"
+        },
+        "Matematika 2": {
+            "Vaje": "1DQN2SIMVkgDK83r8Ngka2NM15RRQOZ52"
+        },
+        "Proseminar A": {
+            "Predavanja": "1qLe9clDzskLy2VyQ7rpnfpgVapIP7O9C"
+        }
+    },
+
+    "2. LETNIK": {
+        "Astronomija 1": {
+            "Vaje": "14xu_PgHCIh_prjsVuQjUfi1sx77xzgxc"
+        },
+        "Klasična mehanika": {
+            "Predavanja": "19biiCAvg5CXdje92HbUjJ5Wx4bzxMZn5",
+            "Vaje": "1LCY0JTwIReRvs5dG2kFWRElEnGlJJA_J"
+        },
+        "Matematika 3": {
+            "List s formulami": "1o2WOnRvhOwPXYAqRF1EcZhz075aI0WM8",
+            "Vaje": "18zI_HG4N8Af7pssBZJmx2MSf4mxCZCXr"
+        },
+        "Matematika 4": {
+            "List s formulami": "1GvkgGWxEJsi0I87qZlcEaHk3HTVVVdFx",
+            "Vaje": "1Ky8UOkTqqfIx5_TYBDoVkz1dpoGutDKt"
+        },
+        "Moderna fizika 1": {
+            "Predavanja": "1Vyu69ltnXLEWDNm_iwEdZ1G4RCM4k0wa",
+            "Vaje": "1d1W9-bg_cV8Qxvcyp1xn4RsFS7w8gzcW"
+        },
+        "Moderna fizika 2": {
+            "List s formulami": "16y2YkLFMzWmh_w-eC8ongHscvV6QX68R",
+            "Predavanja": "1ikKZ6qs8kED6zrzduL1eovTovINhc41X",
+            "Vaje": "1l7Jp1xr3wUovTT4GaECJ4nI9j_oRhd74"
+        },
+        "Naše in druga osončja": {
+            "Vaje": "1m2vRmrm3xwwZln2hD820uFLiBY-sNOv_",
+            "Zapiski za ustni izpit": "1soEdeMDbHWRyvOlH3G6AW_S1pUTcTcDs"
+        },
+        "Statistična termodinamika": {
+            "Predavanja": "1_k3Hy3b-YFYIfYIs84YslGw3IOECZ8G8",
+            "Tutorstvo 1. del": "14PrL58FrgQmrRGnLgYqK4KbM5t7nL5TQ",
+            "Tutorstvo 2. del": "1EIZ8PRtWCD-ZonWqKNXeNUZ5Pdl8P6lY",
+            "Vaje": "1W3mdxbIGsQSzwuoYGvAGzKLg3h_-On99"
+        },
+        "Verjetnost v fiziki": {
+            "List s formulami": "1brfahslFwsdrypPiCQ3KHR5Chzqcr7sz",
+            "Predavanja": "1PogytW5G0kj4MRl_YkgNpDNpp3Ff-77g",
+            "Vaje": "1OfBeu6DxQ3wwO6UcYUZXex_Owiz2JynH"
+        }
+    },
+
+    "3. LETNIK": {
+        "Elektromagnetno polje": {
+            "Predavanja": "151WP_hdL1OCRtvR1SYOFntc-AdJnT9M9",
+            "Vaje": "1-BRA0BDySdjgaToQXGLWivWksfG8R0Di"
+        },
+        "Fizika jedra in osnovnih delcev": {
+            "Predavanja": "1CtL4fj7ZXRdgGYaKCA5E79FxH1Jt0d8c",
+            "Vaje": "13XSpHvKeSFi2Vp1FW081xeMkSH65riH0",
+            "Zapiski za ustni izpit": "1f7yOmSsChuN-tJHoniCLDcxl67cv7z7V"
+        },
+        "Fizika trdne snovi": {
+            "Predavanja": "1J7WdeA0IOFz5JwEcdFo6kKT5b9H7uluI",
+            "Vaje": "18vg6L72hXOvpzQc8ueVRdN6p3dI6zc7B"
+        },
+        "Fizikalna merjenja": {
+            "Predavanja": "1ty99IaV3HFxvPSI0zjkgRXiLk-LoZiY8",
+            "Vaje": "1GGh8enh3b4fPd-4t0hFBR1eaS0SXaQdT",
+            "Zapiski za ustni izpit": "1OwimxlWMGNpv-o_gWY_U8odcLXJOvdR2"
+        },
+        "Jedrska tehnika in energetika": {
+            "Vaje": "1SUYNiGSCRCG4pyObCNGU9gCHVLeAVkT9",
+            "Zapiski za ustni izpit": "1sWa9AtCuSXCk_bYPAaVNl2hvNoPZeX7c"
+        },
+        "Kvantna mehanika": {
+            "Predavanja": "1DGlYKz0P1J4CNCMga9h0DhCyJYw6mMtZ",
+            "Vaje": "1LsKkQRvVG8zgUzZiJbmv4MdAAoX2reYn"
+        },
+        "Mehanika kontinuov": {
+            "Predavanja": "1xfpOVHiDsx_hC0tqy1fm-4_ph18EcA0c",
+            "Vaje": "1vJw8l5UxImgkFcHjQFJnueLxd5og-GYp"
+        },
+        "Merjenje ionizirajočega sevanja": {
+            "Predavanja + vaje": "1ajdBsywsWFjNcV46K-7RWMVTUgYuM-Bn"
+        },
+        "Reaktorska fizika": {
+            "Predavanja + vaje": "1TmHa53vc5XuSaqVEpDSoCcbLVYh4vLBA",
+            "Zapiski za ustni izpit": "1joTucl03x-QncR6NSTxdgP8Qe7G0ZzjL"
+        }
+    }
+};
+
+function preview(id) {
+    return `https://drive.google.com/file/d/${id}/preview`;
+}
+
+function download(id) {
+    return `https://drive.google.com/uc?export=download&id=${id}`;
+}
+
+function createCard(subject, files) {
+    let items = "";
+
+    for (const title in files) {
+        const id = files[title];
+
+        items += `
+            <li>
+                <b>${title}</b> —
+                <a href="${preview(id)}" target="_blank">Preview</a> |
+                <a href="${download(id)}">Download</a>
+            </li>
+        `;
+    }
+
+    return `
+        <div class="card" data-subject="${subject.toLowerCase()}">
+            <h3>${subject}</h3>
+            <hr>
+            <ul>${items}</ul>
+        </div>
+    `;
+}
+
+
+function render() {
+    const container = document.getElementById("content");
+
+    for (const year in driveData) {
+
+        const section = document.createElement("section");
+
+        section.innerHTML = `
+            <h2 class="year-title">${year}</h2>
+            <div class="grid">
+                ${Object.entries(driveData[year])
+                    .map(([subject, files]) => createCard(subject, files))
+                    .join("")}
+            </div>
+        `;
+
+        container.appendChild(section);
+    }
+}
+
+document.getElementById("search").addEventListener("keyup", function() {
+    const filter = this.value.toLowerCase();
+    const cards = document.querySelectorAll(".card");
+
+    cards.forEach(card => {
+        const subject = card.dataset.subject;
+        card.style.display = subject.includes(filter) ? "" : "none";
+    });
+});
+
+
+render();
+</script>
+
+
+</body>
+
+<footer>
+    <div class="footer-content">
+        <p>© 2026 Renejini zapiski</p>
+        <p>Zadnja posodobitev: februar 2026</p>
+        <p>
+            Narejeno za študente fizike · 
+            <a href="https://mail.google.com/mail/?view=cm&to=rm80175@student.uni-lj.si" target="_blank">
+                rm80175@student.uni-lj.si
+            </a>
+        </p>
+    </div>
+</footer>
+
+</html>
+
