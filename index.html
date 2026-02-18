@@ -158,6 +158,7 @@ footer {
     align-items: center; /* centrirano */
     margin-top: 30px;
     gap:50px; /* razmik med toggleable card-i */
+    overflow: visible;   /* test */
 }
 
 .toggleable {
@@ -165,6 +166,7 @@ footer {
     width: 600px; /* fiksna širina toggleable card-a */
     text-align: left;
     padding-bottom: 20px; /* da je prostor za tab spodaj */
+    overflow: visible; /* test */
 }
 
 .toggleable .toggle-tab {
@@ -221,16 +223,6 @@ footer {
 
 /* Dark toggle */
 
-#dark-toggle {
-    margin-top: 12px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: #2563eb;
-    color: white;
-    font-size: 14px;
-}
 
 body.dark {
     background: #0f172a;
@@ -260,6 +252,7 @@ body.dark .card hr {
     width: 52px;
     height: 28px;
     margin-top: 14px;
+    position: relative;
 }
 
 .switch input {
@@ -275,10 +268,6 @@ body.dark .card hr {
     background: #475569;
     border-radius: 28px;
     transition: 0.3s;
-}
-
-.switch {
-    position: relative;
 }
 
 .slider::before {
@@ -323,11 +312,64 @@ input:checked + .slider .icon {
     }
 }
 
-@media (max-width: 1500px){
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden; /* move it here instead of container */
+}
+
+.container {
+    max-width: 1250px;
+    margin: auto;
+    padding: 20px;
+    min-height: calc(54vh - 35px - 20px - 35px);
+    margin-bottom: 40px;
+    /* remove overflow-x: hidden from here */
+}
+
+.year-content {
+    overflow: visible; /* changed from hidden */
+    transition: max-height 0.3s ease;
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
     .grid {
         grid-template-columns: 1fr;
     }
+
+    .toggleable {
+        width: 100%;
+    }
+
+    .year-title {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .year-arrow {
+        display: inline;
+    }
+
+    .year-content {
+        overflow: hidden; /* only hidden on mobile where we need the collapse */
+        max-height: 0px;
+    }
+    
+    .toggleable-container {
+        overflow: visible;
+    }
+
+    .toggleable {
+        overflow: visible;
+        margin-bottom: 30px; /* extra space so the tab doesn't overlap next card */
+    }
+    
 }
+
+
 </style>
 </head>
 <body>
@@ -479,7 +521,7 @@ const driveData = {
         },
         "Seminar": {
             "Seminarska naloga": "",
-            "Predstavitev PowerPoint": "",
+            "Predstavitev": "",
         },
         "Fizikalni praktikum V": {
             "Difuzija": "",
@@ -579,6 +621,55 @@ function render() {
 }
 
 
+function render() {
+    const container = document.getElementById("content");
+    container.innerHTML = "";
+
+    for (const year in driveData) {
+        const section = document.createElement("section");
+
+        const subjects = Object.entries(driveData[year]);
+        const normalCards = [];
+        const toggleCards = [];
+
+        subjects.forEach(([subject, files]) => {
+            const toggleable = toggleableSubjects.includes(subject.toLowerCase());
+            const cardHTML = createCard(subject, files, toggleable);
+            if (toggleable) toggleCards.push(cardHTML);
+            else normalCards.push(cardHTML);
+        });
+
+        section.innerHTML = `
+            <h2 class="year-title">
+                ${year} <span class="year-arrow">►</span>
+            </h2>
+            <div class="year-content">
+                <div class="grid">
+                    ${normalCards.join("")}
+                </div>
+                <div class="toggleable-container">
+                    ${toggleCards.join("")}
+                </div>
+            </div>
+        `;
+
+        container.appendChild(section);
+    }
+
+    document.querySelectorAll(".year-title").forEach(title => {
+        title.addEventListener("click", function() {
+            const isMobilePortrait = window.innerWidth <= 600 && window.innerHeight > window.innerWidth;
+            if (!isMobilePortrait) return;
+
+            const content = this.nextElementSibling;
+            const arrow = this.querySelector(".year-arrow");
+            const isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
+
+            content.style.maxHeight = isOpen ? "0px" : "9999px";
+            arrow.textContent = isOpen ? "▼" : "►";
+        });
+    });
+}
 
 
 
@@ -589,13 +680,10 @@ document.addEventListener("click", function(e) {
         const list = card.querySelector(".file-list");
 
         const isOpen = list.style.maxHeight && list.style.maxHeight !== "0px";
-        list.style.maxHeight = isOpen ? "0px" : "500px";
-
+        list.style.maxHeight = isOpen ? "0px" : "1000px";
         e.target.textContent = isOpen ? "▼" : "▲";
     }
 });
-
-
 
 
 
@@ -657,6 +745,7 @@ render();
 </footer>
 
 </html>
+
 
 
 
