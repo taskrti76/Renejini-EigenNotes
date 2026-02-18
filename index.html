@@ -67,7 +67,7 @@ header input {
     max-width: 1250px;
     margin: auto;
     padding: 20px;
-    min-height: calc(75vh - 35px - 20px - 35px);
+    min-height: calc(54vh - 35px - 20px - 35px);
     margin-bottom: 40px;
 }
 
@@ -214,11 +214,111 @@ footer {
 .toggleable .file-list {
     margin-top: 10px;
     text-align: left;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.6s ease;
 }
 
+/* Dark toggle */
+
+#dark-toggle {
+    margin-top: 12px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    font-size: 14px;
+}
+
+body.dark {
+    background: #0f172a;
+}
+
+body.dark .card {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark .year-title {
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+body.dark .card a {
+    color: #60a5fa;
+}
+
+body.dark .card hr {
+    border-color: #334155;
+}
+
+/* body.dark header {
+    background: #0f172a;
+} */
 
 
+.switch {
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+    margin-top: 14px;
+}
 
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #475569;
+    border-radius: 28px;
+    transition: 0.3s;
+}
+
+.switch {
+    position: relative;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked + .slider {
+    background: #2563eb;
+}
+
+input:checked + .slider::before {
+    transform: translateX(24px);
+}
+
+.slider .icon {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    transition: 0.3s;
+    pointer-events: none;
+}
+
+input:checked + .slider .icon {
+    right: auto;
+    left: 6px;
+}
 
 /* MOBILE */
 @media (max-width: 900px) {
@@ -242,6 +342,14 @@ footer {
         Zbrani moji zapiski iz predavanj, vaj in nekaj zapiskov za izpite za FMF študente
         </div>
     <input type="text" id="search" placeholder="🔍 Išči predmet..." />
+    
+    <label class="switch">
+        <input type="checkbox" id="dark-toggle">
+        <span class="slider">
+            <span class="icon">☽</span>
+        </span>
+    </label>
+
 </header>
 
 <div class="container" id="content"></div>
@@ -373,6 +481,10 @@ const driveData = {
             "Predavanja + vaje": "1TmHa53vc5XuSaqVEpDSoCcbLVYh4vLBA",
             "Zapiski za ustni izpit": "1joTucl03x-QncR6NSTxdgP8Qe7G0ZzjL"
         },
+        "Seminar": {
+            "Seminarska naloga": "",
+            "Predstavitev PowerPoint": "",
+        },
         "Fizikalni praktikum V": {
             "Difuzija": "",
             "Elektronska spinska resonanca": "",
@@ -412,7 +524,6 @@ function download(id) {
 
 
 
-
 function createCard(subject, files, toggleable = false) {
     let items = "";
     for (const category in files) {
@@ -430,7 +541,7 @@ function createCard(subject, files, toggleable = false) {
         <div class="card ${toggleable ? "toggleable" : ""}" data-subject="${subject.toLowerCase()}">
             <h3>${subject}</h3>
             <hr>
-            <ul class="file-list" style="${toggleable ? 'display:none;' : ''}">
+            <ul class="file-list">
                 ${items}
             </ul>
             ${toggleable ? '<div class="toggle-tab" data-tooltip="Prikaži/skrij vsebino">▼</div>' : ''}
@@ -438,8 +549,6 @@ function createCard(subject, files, toggleable = false) {
         </div>
     `;
 }
-
-
 
 function render() {
     const container = document.getElementById("content");
@@ -483,8 +592,8 @@ document.addEventListener("click", function(e) {
         const card = e.target.closest(".toggleable");
         const list = card.querySelector(".file-list");
 
-        const isOpen = list.style.display !== "none";
-        list.style.display = isOpen ? "none" : "block";
+        const isOpen = list.style.maxHeight && list.style.maxHeight !== "0px";
+        list.style.maxHeight = isOpen ? "0px" : "500px";
 
         e.target.textContent = isOpen ? "▼" : "▲";
     }
@@ -504,6 +613,21 @@ document.getElementById("search").addEventListener("keyup", function() {
         card.style.display = subject.includes(filter) ? "" : "none";
     });
 });
+
+
+const toggle = document.getElementById("dark-toggle");
+
+toggle.addEventListener("change", function() {
+    document.body.classList.toggle("dark", this.checked);
+    localStorage.setItem("darkMode", this.checked);
+    document.querySelector(".slider .icon").textContent = this.checked ? "☀" : "☽";
+});
+
+if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
+    toggle.checked = true;
+    document.querySelector(".slider .icon").textContent = "☀";
+}
 
 
 render();
@@ -537,4 +661,5 @@ render();
 </footer>
 
 </html>
+
 
