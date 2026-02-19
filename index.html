@@ -707,12 +707,21 @@ toggle.addEventListener("change", function() {
     document.querySelector(".slider .icon").textContent = this.checked ? "☀" : "☽";
 });
 
-if (localStorage.getItem("darkMode") === "true") {
+const savedMode = localStorage.getItem("darkMode");
+
+if (savedMode === null) {
+    // no saved preference, use system
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (prefersDark) {
+        document.body.classList.add("dark");
+        toggle.checked = true;
+        document.querySelector(".slider .icon").textContent = "☀";
+    }
+} else if (savedMode === "true") {
     document.body.classList.add("dark");
     toggle.checked = true;
     document.querySelector(".slider .icon").textContent = "☀";
 }
-
 
 render();
 </script>
@@ -745,6 +754,7 @@ render();
 </footer>
 
 </html>
+
 
 
 
