@@ -2,407 +2,931 @@
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
-<title>Renejini EigenNotes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Renejini EigenNotes — zapiski FMF</title>
+<meta name="description" content="Zapiski s predavanj, vaj in izpitov za študente fizike na FMF. Brskaj, poglej v brskalniku ali prenesi PDF.">
+<meta property="og:title" content="Renejini EigenNotes">
+<meta property="og:description" content="Zapiski s predavanj, vaj in izpitov za študente fizike na FMF.">
+<meta property="og:type" content="website">
+
+<link rel="icon" href="logo.svg" type="image/svg+xml">
 <link rel="icon" href="favicon_io2/favicon.ico">
 <link rel="icon" href="favicon_io2/favicon-32x32.png" type="image/png" sizes="32x32">
 <link rel="icon" href="favicon_io2/favicon-16x16.png" type="image/png" sizes="16x16">
 <link rel="apple-touch-icon" href="favicon_io2/apple-touch-icon.png" sizes="180x180">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
 <style>
+/* ─── tokens ───────────────────────────────────────────────── */
+:root {
+    --paper:      #dfe4e0;   /* ozadje strani */
+    --band:       #edf1e7;   /* glava in noga — pas z olivnim pridihom */
+    --surface:    #f9fbf7;   /* kartice — ne čisto bela */
+    --ink:        #0d1526;
+    --ink-soft:   #5b6b86;
+    --rule:       #c6cec2;
+    --accent:     #2f4fe0;   /* indigo — Hβ */
+    --accent-2:   #dd8b0b;   /* jantar — natrijev dublet */
+    --accent-3:   #6f8236;   /* olivna — svetli način */
+    --tint:       #6f8236;   /* barva teme, ki pobarva kartice in ozadje */
+    --tint-card:  2%;        /* koliko tinte gre v kartico — zadržano */
+    --tint-bg:    6%;
+    --glow:       #ffcf5c;
+    --shadow:     0 1px 0 rgba(13,21,38,.05), 0 8px 24px rgba(13,21,38,.09);
+
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+
+    --r: 4px;
+}
+
+body.dark {
+    --paper:      #0a1120;
+    --band:       #0d1930;
+    --surface:    #111c30;
+    --ink:        #e5ecf6;
+    --ink-soft:   #8ea0ba;
+    --rule:       #22314c;
+    --accent:     #6ea8ff;
+    --accent-2:   #f2a94b;
+    --accent-3:   #b08cff;
+    --tint:       #6ea8ff;   /* v temnem načinu kartice vlečejo v modro-vijolično */
+    --tint-card:  3%;
+    --tint-bg:    7%;
+    --glow:       #33415c;
+    --shadow:     0 1px 0 rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; animation: none !important; }
+}
+
 body {
     margin: 0;
-    padding: 0;
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    font-family: Arial, sans-serif;
-    background: #dee8ff;
+    background:
+        radial-gradient(80% 50% at 100% 0%, color-mix(in srgb, var(--accent-3) var(--tint-bg), transparent), transparent 72%),
+        radial-gradient(70% 45% at 0% 22%, color-mix(in srgb, var(--tint) var(--tint-bg), transparent), transparent 74%),
+        var(--paper);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background .25s ease, color .25s ease;
 }
 
-/* HEADER */
+a { color: var(--accent); }
+
+:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ─── signature: spectral strip ────────────────────────────── */
+/* emisijske črte — pozicije so poljubne, a fiksne; to je podpis strani */
+.spectrum {
+    height: 6px;
+    width: 100%;
+    background:
+        linear-gradient(90deg, transparent 0 6%,  var(--accent-2) 6% 6.4%,   transparent 6.4% 14%,
+                               var(--accent) 14% 14.3%,  transparent 14.3% 21%,
+                               var(--accent) 21% 21.5%,  transparent 21.5% 33%,
+                               var(--accent-2) 33% 33.3%, transparent 33.3% 40%,
+                               var(--accent) 40% 40.7%,  transparent 40.7% 55%,
+                               var(--accent-2) 55% 55.3%, transparent 55.3% 61%,
+                               var(--accent) 61% 61.4%,  transparent 61.4% 74%,
+                               var(--accent) 74% 74.6%,  transparent 74.6% 82%,
+                               var(--accent-2) 82% 82.3%, transparent 82.3% 91%,
+                               var(--accent) 91% 91.4%,  transparent 91.4% 100%);
+}
+
+/* ─── header ───────────────────────────────────────────────── */
 header {
-    text-align: center;
-    padding: 35px 20px 10px;
-    background: #1e293b;
-    color: white;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(120% 140% at 88% -20%, color-mix(in srgb, var(--accent-3) 7%, transparent) 0%, transparent 58%),
+        var(--band);
+    border-bottom: 1px solid var(--rule);
+    padding: 48px 20px 30px;
 }
 
-header h1 {
+/* milimetrski papir v ozadju */
+header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--rule) 1px, transparent 1px),
+        linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: .4;
+    mask-image: radial-gradient(130% 110% at 12% 0%, #000 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(130% 110% at 12% 0%, #000 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* podpis: lastna enačba, po kateri se stran imenuje.
+   Živi v svoji celici mreže (2. vrstica, desni stolpec), zato je iskalnik nikoli ne prekrije. */
+.eq {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: end;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(26px, 6.5vw, 104px);
+    letter-spacing: -0.04em;
+    line-height: .8;
+    color: var(--ink);
+    opacity: .07;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    margin-bottom: -10px;
+}
+/* skrije se šele na pravem telefonu, ne že pri pol zaslona */
+@media (max-width: 560px) {
+    .eq { display: none; }
+}
+
+.head-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1180px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 26px 24px;
+    align-items: start;
+}
+
+.wordmark {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(40px, 6.4vw, 72px);
+    letter-spacing: -0.045em;
     margin: 0;
-    font-size: 32px;
+    line-height: .92;
+}
+.wordmark .rene {
+    display: block;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: .2em;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+}
+.wordmark .eigen {
+    color: var(--accent);
+    position: relative;
+}
+/* podčrtaj kot spektralna črta */
+.wordmark .eigen::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -8px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent) 0 34%, var(--accent-2) 34% 47%, var(--accent) 47% 78%, var(--accent-2) 78% 84%, var(--accent) 84% 100%);
+    border-radius: 2px;
 }
 
-header p {
-    color: #666;
-    margin-top: 6px;
+.tagline {
+    margin: 26px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    max-width: 44ch;
 }
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.searchbox {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 0 12px;
+    max-width: 520px;
+    min-width: 0;
+    transition: border-color .15s ease;
+}
+.searchbox:focus-within { border-color: var(--accent); }
+
+.searchbox svg { flex: none; color: var(--ink-soft); }
 
 #search {
+    flex: 1;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: 400 16px/1 var(--font-body);
+    padding: 13px 0;
+}
+#search:focus { outline: none; }
+#search::placeholder { color: var(--ink-soft); }
+
+#count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    letter-spacing: .02em;
+}
+
+/* ─── viseča svetilka (preklop teme) ───────────────────────── */
+/* Žica visi z vrha glave, žarnica visi z nje z glavo navzdol,
+   pod njo pa visi vrvica z obročkom, ki jo povlečeš. */
+.lamp {
+    position: relative;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-top: -48px;          /* žica pride iz roba glave */
+    cursor: pointer;
+    display: grid;
+    justify-items: center;
+    width: 60px;
+}
+
+.lamp .wire {
+    width: 2px;
+    height: 46px;
+    background: linear-gradient(var(--rule), var(--ink-soft));
+    border-radius: 1px;
+}
+
+.lamp .bulb {
+    width: 34px;
+    height: 34px;
+    transform: rotate(180deg);   /* z glavo navzdol */
+    position: relative;
+    z-index: 2;
+    color: var(--ink-soft);
+    transition: color .25s ease, filter .25s ease;
+}
+
+/* prižgana = svetli način */
+.lamp[aria-pressed="false"] .bulb {
+    color: var(--glow);
+    filter: drop-shadow(0 0 7px var(--glow))
+            drop-shadow(0 0 22px color-mix(in srgb, var(--glow) 60%, transparent));
+}
+
+/* svetlobni stožec — vrh se dotika žarnice, vrvica teče skozenj */
+.lamp .cone {
+    position: absolute;
+    top: 76px;                   /* žica 46px + žarnica 34px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 132px;
+    height: 108px;
+    clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--glow) 48%, transparent), transparent 82%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+.lamp[aria-pressed="false"] .cone { opacity: 1; }
+
+/* potezna vrvica visi iz žarnice, skozi stožec, do obročka */
+.lamp .pull {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    margin-top: -2px;            /* se drži dna žarnice */
+}
+
+/* vrvica se RAZTEGNE, ne premakne — zato ostane pripeta na žarnico */
+.lamp .pull-cord {
+    width: 2px;
+    height: 42px;
+    background: var(--ink-soft);
+    opacity: .75;
+    transition: height .2s cubic-bezier(.34,1.56,.64,1);
+}
+.lamp:hover  .pull-cord { height: 47px; }
+.lamp:active .pull-cord { height: 54px; }
+
+.lamp .pull-bead {
+    width: 14px;
+    height: 14px;
+    margin-top: -1px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-2) 22%, transparent);
+}
+
+/* ─── layout ───────────────────────────────────────────────── */
+main {
+    flex: 1;
     width: 100%;
-    max-width: 420px;
-    margin-top: 18px;
-    padding: 12px 14px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 8px 20px 64px;
 }
 
-header input {
-    display: block;
+.year {
+    margin-top: 44px;
+}
+
+.year-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 4%, transparent), transparent 55%);
+    border: 0;
+    border-bottom: 2px solid color-mix(in srgb, var(--accent) 40%, var(--rule));
+    border-radius: var(--r) var(--r) 0 0;
+    padding: 10px 14px;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: border-color .18s ease;
+}
+.year-head:hover {
+    border-color: var(--accent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 9%, transparent), transparent 60%);
+}
+.year-head:hover .year-arrow { color: var(--accent); border-color: var(--accent); }
+
+.year-label {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+}
+
+.year-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
     margin-left: auto;
-    margin-right: auto;
 }
 
-.subtitle {
-    font-size: 16px;
-    font-weight: normal;
-    margin-top: 8px;
-    opacity: 0.85;
+.year-arrow {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--accent);
+    font-size: 20px;
+    line-height: 1;
+    transition: transform .28s ease, color .15s ease, border-color .15s ease, background .15s ease;
 }
+.year-head:hover .year-arrow { background: var(--accent); color: var(--surface); }
+.year-head[aria-expanded="true"] .year-arrow { transform: rotate(90deg); }
 
-/* CONTAINER */
-.container {
-    max-width: 1250px;
-    margin: auto;
-    padding: 20px;
-    min-height: calc(54vh - 35px - 20px - 35px);
-    margin-bottom: 40px;
+.year-body {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows .32s ease;
 }
+.year-body > .year-body-inner { min-height: 0; }
+.year-body[data-open="false"] { grid-template-rows: 0fr; }
+.year-body[data-open="false"] > .year-body-inner { overflow: hidden; }
 
-/* YEAR TITLE */
-.year-title {
-    margin-top: 40px;
-    border-bottom: 2px solid #ddd;
-    padding-bottom: 6px;
-}
-
-/* GRID */
 .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
     margin-top: 20px;
 }
 
-
-/* CARD */
+/* ─── card ─────────────────────────────────────────────────── */
 .card {
-    background: white;
-    border-radius: 10px;
-    padding: 18px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--tint) 3%, transparent), transparent 40%),
+        color-mix(in srgb, var(--tint) var(--tint-card), var(--surface));
+    border: 1px solid color-mix(in srgb, var(--tint) 5%, var(--rule));
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    padding: 16px 18px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.card::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: .4;
+    transition: opacity .15s ease, width .15s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.card:hover::before { opacity: 1; width: 4px; }
+
+/* naslov kartice v barvi teme */
+.card h3 { color: var(--ink); }
+.n-files {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+    border-radius: 999px;
+    padding: 2px 8px;
+}
+
+.card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--rule);
 }
 
 .card h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-}
-
-.card hr {
-    border: none;
-    border-top: 1px solid #eee;
-    margin: 10px 0;
-}
-
-.card ul {
-    padding-left: 18px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.25;
     margin: 0;
 }
 
-.card li {
-    margin-bottom: 6px;
+.n-files {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    flex: none;
 }
 
-.card a {
-    text-decoration: none;
-    color: #2563eb;
-    font-weight: bold;
-}
+.file-list { list-style: none; margin: 0; padding: 0; }
 
-.card a:hover {
-    text-decoration: underline;
-}
-
-footer {
-    background: #1e293b;
-    color: #cbd5e1;
-    padding: 35px 20px;
-    text-align: center;
-}
-
-.footer-content p {
-    margin: 6px 0;
-    font-size: 14px;
-}
-
-.footer-content a {
-    color: #60a5fa;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.footer-content a:hover {
-    text-decoration: underline;
-}
-
-.file-list {
-    transition: max-height 0.3s ease;
-    overflow: hidden;
-}
-
-.toggleable-container {
+.file-list li {
     display: flex;
-    flex-direction: column;
-    align-items: center; /* centrirano */
-    margin-top: 30px;
-    gap:50px; /* razmik med toggleable card-i */
-    overflow: visible;   /* test */
-}
-
-.toggleable {
-    position: relative;
-    width: 600px; /* fiksna širina toggleable card-a */
-    text-align: left;
-    padding-bottom: 20px; /* da je prostor za tab spodaj */
-    overflow: visible; /* test */
-}
-
-.toggleable .toggle-tab {
-    position: absolute;
-    bottom: 0; /* spodaj card-a */
-    left: 50%;
-    transform: translateX(-50%) translateY(100%); /* jeziček štrli navzdol */
-    width: 40px; /* ožji jeziček */
-    background: #2563eb;
-    color: white;
-    border-radius: 0 0 6px 6px; /* zgornji rob okrogljen, spodnji ravno */
-    cursor: pointer;
-    user-select: none;
-    padding: 4px 0;
-    font-weight: bold;
-    text-align: center;
-    transition: background 0.2s;
-}
-
-.toggle-tab::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%; /* nad jezičkom */
-    left: 50%;
-    transform: translateX(-50%);
-    background: #333;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-    margin-bottom: 6px; /* prostor med jezičkom in tooltipom */
-    z-index: 10;
-}
-
-.toggle-tab:hover::after {
-    opacity: 1;
-}
-
-.toggleable .toggle-tab:hover {
-    background: #1d4ed8;
-}
-
-.toggleable .file-list {
-    margin-top: 10px;
-    text-align: left;
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.6s ease;
-}
-
-/* Dark toggle */
-
-
-body.dark {
-    background: #0f172a;
-}
-
-body.dark .card {
-    background: #1e293b;
-    color: #e2e8f0;
-}
-
-body.dark .year-title {
-    color: #e2e8f0;
-    border-color: #334155;
-}
-
-body.dark .card a {
-    color: #60a5fa;
-}
-
-body.dark .card hr {
-    border-color: #334155;
-}
-
-
-.switch {
-    display: inline-block;
-    width: 52px;
-    height: 28px;
-    margin-top: 14px;
-    position: relative;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: #475569;
-    border-radius: 28px;
-    transition: 0.3s;
-}
-
-.slider::before {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    left: 4px;
-    bottom: 4px;
-    background: white;
-    border-radius: 50%;
-    transition: 0.3s;
-}
-
-input:checked + .slider {
-    background: #2563eb;
-}
-
-input:checked + .slider::before {
-    transform: translateX(24px);
-}
-
-.slider .icon {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
     font-size: 14px;
-    transition: 0.3s;
-    pointer-events: none;
+}
+.file-list li + li { border-top: 1px solid var(--rule); }
+
+.fname { flex: 1; min-width: 0; }
+
+.acts { display: flex; gap: 6px; flex: none; }
+
+.act {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    transition: filter .12s ease, transform .08s ease;
+}
+.act:active { transform: translateY(1px); }
+
+/* poglej = polni gumb, primarna akcija */
+.act.pv {
+    background: var(--accent);
+    color: #fff;
+}
+.act.pv:hover { filter: brightness(1.12); }
+
+/* prenesi = obrobljen v jantarni barvi, sekundarna akcija */
+.act.dl {
+    background: color-mix(in srgb, var(--accent-2) 14%, transparent);
+    border-color: var(--accent-2);
+    color: var(--accent-2);
+}
+.act.dl:hover { background: var(--accent-2); color: #fff; }
+
+.soon {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+    border: 1px dashed var(--rule);
+    border-radius: 3px;
+    padding: 6px 12px;
+    flex: none;
 }
 
-input:checked + .slider .icon {
-    right: auto;
-    left: 6px;
+/* ─── praktikum (collapsible, wide) ────────────────────────── */
+.wide-list {
+    margin-top: 26px;
+    display: grid;
+    gap: 14px;
 }
 
-/* MOBILE */
-@media (max-width: 1200px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+.wide-list { margin-bottom: 34px; }
+
+.card.wide::before { background: var(--accent-3); opacity: 1; }
+.card.wide {
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--accent-3) 5%, transparent), transparent 44%),
+        color-mix(in srgb, var(--accent-3) 2%, var(--surface));
+    grid-column: 1 / -1;
+    overflow: visible;              /* da jeziček lahko štrli ven */
+    padding-bottom: 6px;
+    margin-bottom: 22px;            /* prostor za jeziček */
+}
+.card.wide:hover { transform: none; border-color: var(--accent-3); box-shadow: 0 8px 22px color-mix(in srgb, var(--accent-3) 10%, transparent); }
+.card.wide .n-files { background: color-mix(in srgb, var(--accent-3) 14%, transparent); color: var(--accent-3); }
+
+.card.wide .card-head { margin-bottom: 0; padding-bottom: 12px; }
+
+/* jeziček, obešen pod kartico */
+.disclose {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 100%);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent-3);
+    border: 0;
+    border-radius: 0 0 6px 6px;
+    color: #fff;
+    font: 500 11px var(--font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 6px 16px 7px;
+    cursor: pointer;
+    transition: filter .15s ease, padding-bottom .15s ease;
+}
+.disclose:hover { filter: brightness(1.12); padding-bottom: 11px; }
+.disclose .chev { display: inline-block; transition: transform .25s ease; }
+.disclose[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.disclose .n-files { color: rgba(255,255,255,.75); }
+
+.card.wide .collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .32s ease;
+}
+.card.wide .collapse[data-open="true"] { grid-template-rows: 1fr; }
+.card.wide .collapse > div { overflow: hidden; }
+
+.card.wide .file-list { columns: 2; column-gap: 28px; padding: 10px 0 14px; }
+.card.wide .file-list li { break-inside: avoid; border-top: 1px solid var(--rule); }
+@media (max-width: 700px) {
+    .card.wide .file-list { columns: 1; }
 }
 
+/* ─── dodatne informacije o predmetu ───────────────────────── */
+.card-head { align-items: flex-start; }
 
-* {
-    box-sizing: border-box;
+.subject-meta {
+    margin: 4px 0 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: .02em;
 }
 
-body {
-    overflow-x: hidden; /* move it here instead of container */
+.notebtn {
+    background: none;
+    border: 0;
+    border-bottom: 1px dashed var(--accent-3);
+    color: var(--accent-3);
+    font: 500 12px var(--font-mono);
+    padding: 0 0 1px;
+    margin: 0 0 10px;
+    cursor: pointer;
+}
+.notebtn:hover { border-bottom-style: solid; }
+.notebtn[aria-expanded="true"] { border-bottom-style: solid; }
+
+.note {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .28s ease;
+}
+.note[data-open="true"] { grid-template-rows: 1fr; }
+.note > div { overflow: hidden; }
+.note p {
+    margin: 0 0 8px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    border-left: 2px solid var(--accent-3);
+    padding: 2px 0 2px 10px;
 }
 
-.container {
-    max-width: 1250px;
-    margin: auto;
-    padding: 20px;
-    min-height: calc(54vh - 35px - 20px - 35px);
-    margin-bottom: 40px;
-    /* remove overflow-x: hidden from here */
+.diff {
+    margin: 0 0 12px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+}
+.diff-label { letter-spacing: .08em; text-transform: uppercase; }
+.diff-label em {
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: .75;
+}
+.diff-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.diff-val { color: var(--accent-3); font-weight: 500; }
+
+.dots { display: inline-flex; gap: 4px; }
+.dots i {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--accent-3);
+}
+.dots i.on { background: var(--accent-3); }
+
+/* ─── letnik brez gradiva ──────────────────────────────────── */
+.year.is-soon .year-arrow { opacity: .5; }
+
+.year-soon {
+    margin-top: 20px;
+    padding: 26px;
+    border: 1px dashed var(--rule);
+    border-radius: var(--r);
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    color: var(--ink-soft);
+}
+.year-soon p { margin: 2px 0; }
+.year-soon strong { color: var(--ink); font-family: var(--font-display); }
+
+/* ─── empty state ──────────────────────────────────────────── */
+#empty {
+    display: none;
+    margin-top: 48px;
+    padding: 32px;
+    border: 1px dashed var(--rule);
+    border-radius: var(--r);
+    text-align: center;
+    color: var(--ink-soft);
+}
+#empty strong { color: var(--ink); font-family: var(--font-display); }
+body.no-results #empty { display: block; }
+
+/* ─── footer ───────────────────────────────────────────────── */
+footer {
+    position: relative;
+    background:
+        radial-gradient(90% 120% at 100% 0%, color-mix(in srgb, var(--accent-3) 8%, transparent), transparent 60%),
+        var(--band);
+    border-top: 1px solid var(--rule);
+    margin-top: 40px;
+}
+footer .spectrum { position: absolute; top: 0; left: 0; }
+
+.foot-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 44px 20px 32px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 36px;
+    align-items: start;
 }
 
-.year-content {
-    overflow: visible; /* changed from hidden */
-    transition: max-height 0.3s ease;
+.foot-brand { display: flex; gap: 16px; align-items: center; }
+
+.foot-logo {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
-@media (max-width: 600px) and (orientation: portrait) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+.foot-name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+}
+.foot-name span { color: var(--accent); }
 
-    .toggleable {
-        width: 100%;
-    }
+.foot-sub { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-soft); }
 
-    .year-title {
-        cursor: pointer;
-        user-select: none;
-    }
-
-    .year-arrow {
-        display: inline;
-    }
-
-    .year-content {
-        overflow: hidden; /* only hidden on mobile where we need the collapse */
-        max-height: 0px;
-    }
-    
-    .toggleable-container {
-        overflow: visible;
-    }
-
-    .toggleable {
-        overflow: visible;
-        margin-bottom: 30px; /* extra space so the tab doesn't overlap next card */
-    }
-    
+/* števci */
+.foot-stats {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 22px;
+    margin: 0;
+    justify-self: start;
+}
+.foot-stats dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+.foot-stats dd {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--accent-3);
+    line-height: 1;
 }
 
+.foot-cta { margin: 0 0 12px; font-size: 13.5px; color: var(--ink-soft); max-width: 30ch; }
 
+.foot-links { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.flink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--ink);
+    transition: border-color .14s ease, color .14s ease, transform .08s ease;
+}
+.flink:hover { transform: translateY(-1px); }
+.flink.mail:hover { border-color: var(--accent);   color: var(--accent); }
+.flink.dc:hover   { border-color: var(--accent-3); color: var(--accent-3); }
+
+.foot-base {
+    border-top: 1px solid var(--rule);
+    padding: 16px 20px 22px;
+}
+.foot-base > * {
+    max-width: 1180px;
+}
+.foot-base {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    max-width: 1180px;
+    margin: 0 auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--ink-soft);
+}
+.foot-eq { color: var(--accent-3); opacity: .8; }
+
+@media (max-width: 860px) {
+    .foot-inner { grid-template-columns: 1fr; gap: 28px; }
+}
+
+/* ─── mobile ───────────────────────────────────────────────── */
+@media (max-width: 700px) {
+    header { padding: 28px 18px 22px; }
+    .file-list li { flex-wrap: wrap; }
+    .acts { width: 100%; }
+    .act { flex: 1; justify-content: center; }
+    .card.wide { margin-bottom: 26px; }
+}
 </style>
 </head>
 <body>
 
-<header>
-    <h1>📚 Renejini EigenNotes</h1>
-        <div class="subtitle">
-        Zbrani moji zapiski iz predavanj, vaj in nekaj zapiskov za izpite za FMF študente
-        </div>
-    <input type="text" id="search" placeholder="🔍 Išči predmet..." />
-    
-    <label class="switch">
-        <input type="checkbox" id="dark-toggle">
-        <span class="slider">
-            <span class="icon">☽</span>
-        </span>
-    </label>
+<div class="spectrum" aria-hidden="true"></div>
 
+<header>
+    <div class="head-inner">
+        <div>
+            <h1 class="wordmark">
+                <span class="rene">Renejini</span><span class="eigen">EigenNotes</span>
+            </h1>
+            <p class="tagline">Zapiski s predavanj, vaj in izpitov. Za študente fizike na FMF.</p>
+        </div>
+
+        <div class="controls">
+            <button id="theme" class="lamp" aria-pressed="false" aria-label="Preklopi svetli / temni način">
+                <span class="wire" aria-hidden="true"></span>
+                <span class="cone" aria-hidden="true"></span>
+                <svg class="bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 18h6"></path>
+                    <path d="M10 21h4"></path>
+                    <path d="M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .9 1.7l.1.5h5.2l.1-.5c.1-.7.4-1.3.9-1.7A6 6 0 0 0 12 3z"></path>
+                </svg>
+                <span class="pull" aria-hidden="true">
+                    <span class="pull-cord"></span>
+                    <span class="pull-bead"></span>
+                </span>
+            </button>
+        </div>
+
+        <span class="eq" aria-hidden="true">Ĥψ = Eψ</span>
+
+        <div class="searchbox">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+            </svg>
+            <input id="search" type="search" placeholder="Išči predmet ali datoteko…" autocomplete="off" aria-label="Išči predmet ali datoteko">
+            <span id="count" aria-live="polite"></span>
+        </div>
+    </div>
 </header>
 
-<div class="container" id="content"></div>
+<main id="content"></main>
+
+<div id="empty">
+    <p><strong>Ni zadetkov.</strong></p>
+    <p>Poskusi krajši izraz — išče po imenu predmeta in po imenih datotek.</p>
+</div>
+
+<footer>
+    <div class="spectrum" aria-hidden="true"></div>
+
+    <div class="foot-inner">
+        <div class="foot-brand">
+            <svg class="foot-logo" viewBox="0 0 100 100" aria-hidden="true">
+                <rect width="100" height="100" rx="24" fill="var(--accent)"/>
+                <ellipse cx="50" cy="50" rx="41" ry="16" fill="none"
+                         stroke="var(--accent-2)" stroke-width="4" transform="rotate(-22 50 50)"/>
+                <g fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M30 34 V 50 a 20 20 0 0 0 40 0 V 34"/>
+                    <path d="M50 24 V 78"/>
+                </g>
+                <circle cx="79" cy="29" r="14" fill="var(--accent-2)"/>
+                <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M74 37 V 21 h 5 a 5 5 0 0 1 0 10 h -5"/>
+                    <path d="M79 31 l 5 6"/>
+                </g>
+            </svg>
+            <div>
+                <p class="foot-name">Renejini <span>EigenNotes</span></p>
+                <p class="foot-sub">Zapiski za študente fizike na FMF.</p>
+            </div>
+        </div>
+
+        <dl class="foot-stats">
+            <div><dt>Predmetov</dt><dd id="stat-subjects">—</dd></div>
+            <div><dt>Datotek</dt><dd id="stat-files">—</dd></div>
+            <div><dt>Posodobljeno</dt><dd>feb 2026</dd></div>
+        </dl>
+
+        <div class="foot-contact">
+            <p class="foot-cta">Manjka kakšen predmet ali si našel napako? Piši mi.</p>
+            <div class="foot-links">
+                <a class="flink mail" href="https://mail.google.com/mail/?view=cm&amp;to=rm80175@student.uni-lj.si" target="_blank" rel="noopener">✉ E-pošta</a>
+                <a class="flink dc" href="https://discord.com/users/renejamarn" target="_blank" rel="noopener">◈ Discord</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="foot-base">
+        <span>© 2026 Renejini EigenNotes</span>
+        <span class="foot-eq">Ĥψ = Eψ</span>
+    </div>
+</footer>
 
 <script>
+/* ─── podatki ──────────────────────────────────────────────── */
+/* Prazen "" = datoteke še ni; kartica jo prikaže kot "kmalu". */
 
-localStorage.removeItem("darkMode");
-    
-const toggleableSubjects = [
+const WIDE = [
     "fizikalni praktikum iv",
     "fizikalni praktikum v",
     "matematično-fizikalni praktikum"
 ];
 
 const driveData = {
-
     "1. LETNIK": {
         "Astronomska opazovanja": {
             "Vaje": "1O8_ZUHQfPQAd_SwoHiClhu5nS050vswu"
@@ -476,8 +1000,8 @@ const driveData = {
             "Sklopljeno nihanje kroga": "1Z0NYxrwAWcxKeQJg2OLGNVByg8ZFzswj",
             "Uklon svetlobe": "1pE1E6HlheN_ltWlMHnWInchMaJZX6ck2",
             "Vrtavka": "13yW0zjnv_rZ8L1TRbLAAbDRA2ZdLoK5g",
-            "Določanje Boltzmannove konst.": "1LZB6zUO3ID1M175xqDzQGYEpjRWayOSz",
-        },
+            "Določanje Boltzmannove konst.": "1LZB6zUO3ID1M175xqDzQGYEpjRWayOSz"
+        }
     },
 
     "3. LETNIK": {
@@ -503,9 +1027,19 @@ const driveData = {
             "Vaje": "1SUYNiGSCRCG4pyObCNGU9gCHVLeAVkT9",
             "Zapiski za ustni izpit": "1sWa9AtCuSXCk_bYPAaVNl2hvNoPZeX7c"
         },
+        /* ── PRIMER razširjenega zapisa. Enako lahko dopolniš katerikoli predmet. ──
+           Vsa polja v "info" so neobvezna: prof, ects, tezavnost (1–5), opis.       */
         "Kvantna mehanika": {
-            "Predavanja": "1DGlYKz0P1J4CNCMga9h0DhCyJYw6mMtZ",
-            "Vaje": "1LsKkQRvVG8zgUzZiJbmv4MdAAoX2reYn"
+            info: {
+                prof: "prof. Ime Priimek",
+                ects: 8,
+                tezavnost: 4,
+                opis: "Izpit je pisni + ustni. Vaje se splača delati sproti — snov se hitro nabere. Za ustni je dovolj, če znaš izpeljati glavne rezultate s predavanj."
+            },
+            files: {
+                "Predavanja": "1DGlYKz0P1J4CNCMga9h0DhCyJYw6mMtZ",
+                "Vaje": "1LsKkQRvVG8zgUzZiJbmv4MdAAoX2reYn"
+            }
         },
         "Mehanika kontinuov": {
             "Predavanja": "1xfpOVHiDsx_hC0tqy1fm-4_ph18EcA0c",
@@ -520,7 +1054,7 @@ const driveData = {
         },
         "Seminar": {
             "Seminarska naloga": "",
-            "Predstavitev": "",
+            "Predstavitev": ""
         },
         "Fizikalni praktikum V": {
             "Difuzija": "1gb_bsx1sjCaHF1hafscXM2YP4wOXdn3W",
@@ -532,7 +1066,7 @@ const driveData = {
             "Osnove mikrovalovne tehnike": "1uLceEUd1jPuC2n28UgY7RRFToXOMHMJC",
             "Poskusi z žarki X": "1diB2tN5uo0KMdZPzgojYHER0a5VJVOZf",
             "Spektrometrija žarkov γ": "131JGsK7h7dPLCQaRo5ZGQI-3wjp6U5Ch",
-            "Sunkovna jedrska magnetna resonanca": "1940pi3P78zTG8CUEI7NSVQVyRVq3gBjy",
+            "Sunkovna jedrska magnetna resonanca": "1940pi3P78zTG8CUEI7NSVQVyRVq3gBjy"
         },
         "Matematično-Fizikalni praktikum": {
             "1. Airyjevi funkciji": "1NlI1BJANgEXLljYB-ae-WCCSaz2_0ZT3",
@@ -546,211 +1080,282 @@ const driveData = {
             "9. Spektralne metode": "1DS991P0obE9DB4_lyfMqs8eP5VXHD7jx",
             "10. Diferenčne metode": "1pmuGcT4_ok_cGyqYwLdTXCNyVfAPwu6w",
             "11. Galerkinova metoda": "1rJFspZobTOKCWzMj_7q4lVr9LRlgr60Z",
-            "12. Strojno učenje": "",
-        },
-    }
+            "12. Strojno učenje": ""
+        }
+    },
+
+    /* Prazen letnik => stran ga izriše kot "kmalu". */
+    "1. LETNIK — MAGISTERIJ": {}
 };
 
-function preview(id) {
-    return `https://drive.google.com/file/d/${id}/preview`;
+/* ─── pomožne ──────────────────────────────────────────────── */
+const previewURL  = id => `https://drive.google.com/file/d/${id}/preview`;
+const downloadURL = id => `https://drive.google.com/uc?export=download&id=${id}&confirm=t`;
+
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* iskanje brez šumnikov: "matematicno" najde "Matematično" */
+const fold = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/* Predmet je lahko zapisan na dva načina:
+     kratko  ->  { "Predavanja": "ID", "Vaje": "ID" }
+     razširjeno -> { info: { prof, ects, tezavnost, opis }, files: { ... } }
+   normalize() poskrbi, da izris ne loči med njima. */
+function normalize(subject) {
+    return subject && subject.files
+        ? { info: subject.info || {}, files: subject.files }
+        : { info: {}, files: subject || {} };
 }
 
-function download(id) {
-    return `https://drive.google.com/uc?export=download&id=${id}`;
-}
+/* ─── izris ────────────────────────────────────────────────── */
+let uid = 0;
 
+function cardHTML(subject, raw) {
+    const { info, files } = normalize(raw);
+    const wide = WIDE.includes(subject.toLowerCase());
+    const entries = Object.entries(files);
+    const ready = entries.filter(([, id]) => id).length;
 
+    const items = entries.map(([name, id]) => `
+        <li>
+            <span class="fname">${esc(name)}</span>
+            ${id ? `
+                <span class="acts">
+                    <a class="act pv" href="${previewURL(id)}" target="_blank" rel="noopener">👁 poglej</a>
+                    <a class="act dl" href="${downloadURL(id)}">⬇ prenesi</a>
+                </span>` : `<span class="soon">kmalu</span>`}
+        </li>`).join("");
 
-function createCard(subject, files, toggleable = false) {
-    let items = "";
-    for (const category in files) {
-        const id = files[category];
-        items += `
-            <li>
-                ${category}: 
-                <a href="${preview(id)}" target="_blank">👁 Preview</a> | 
-                <a href="${download(id)}">⬇ Download</a>
-            </li>
-        `;
+    /* vrstica pod naslovom: profesor · ECTS */
+    const facts = [info.prof, info.ects ? `${info.ects} ECTS` : ""].filter(Boolean);
+    const factLine = facts.length
+        ? `<p class="subject-meta">${facts.map(esc).join(" · ")}</p>` : "";
+
+    /* zahtevnost 1–5 kot pike */
+    const dots = info.tezavnost
+        ? `<div class="diff">
+               <span class="diff-label">Zahtevnost <em>(moja ocena)</em></span>
+               <span class="diff-row">
+                   <span class="dots" aria-hidden="true">` +
+                       [1,2,3,4,5].map(i => `<i class="${i <= info.tezavnost ? "on" : ""}"></i>`).join("") +
+                   `</span>
+                   <span class="diff-val">${info.tezavnost}/5</span>
+               </span>
+           </div>` : "";
+
+    const id  = `c${++uid}`;
+    const nid = `n${uid}`;
+
+    const noteBtn = info.opis
+        ? `<button class="notebtn" aria-expanded="false" aria-controls="${nid}">o predmetu</button>` : "";
+    const notePanel = info.opis
+        ? `<div class="note" id="${nid}" data-open="false"><div><p>${esc(info.opis)}</p>${dots}</div></div>` : "";
+
+    const haystack = fold([subject, ...entries.map(([n]) => n), info.prof || "", info.opis || ""].join(" "));
+
+    if (!wide) {
+        return `
+        <article class="card" data-search="${esc(haystack)}">
+            <div class="card-head">
+                <div>
+                    <h3>${esc(subject)}</h3>
+                    ${factLine}
+                </div>
+                <span class="n-files">${ready}/${entries.length}</span>
+            </div>
+            ${noteBtn}${notePanel}
+            <ul class="file-list">${items}</ul>
+        </article>`;
     }
 
     return `
-        <div class="card ${toggleable ? "toggleable" : ""}" data-subject="${subject.toLowerCase()}">
-            <h3>${subject}</h3>
-            <hr>
-            <ul class="file-list">
-                ${items}
-            </ul>
-            ${toggleable ? '<div class="toggle-tab" data-tooltip="Prikaži/skrij vsebino">▼</div>' : ''}
-
-        </div>
-    `;
+        <article class="card wide" data-search="${esc(haystack)}">
+            <div class="card-head">
+                <div>
+                    <h3>${esc(subject)}</h3>
+                    ${factLine}
+                </div>
+                <span class="n-files">${ready}/${entries.length}</span>
+            </div>
+            ${noteBtn}${notePanel}
+            <div class="collapse" id="${id}" data-open="false">
+                <div><ul class="file-list">${items}</ul></div>
+            </div>
+            <button class="disclose" aria-expanded="false" aria-controls="${id}">
+                <span>vaje</span>
+                <span class="chev" aria-hidden="true">▾</span>
+            </button>
+        </article>`;
 }
-
-
 
 function render() {
-    const container = document.getElementById("content");
-    container.innerHTML = "";
+    const main = document.getElementById("content");
+    /* na mobilnem so letniki zaprti, na namizju odprti */
+    const open = !window.matchMedia("(max-width: 700px)").matches;
 
-    for (const year in driveData) {
-        const section = document.createElement("section");
+    main.innerHTML = Object.entries(driveData).map(([year, subjects]) => {
+        const normal = [], wide = [];
+        for (const [subject, files] of Object.entries(subjects)) {
+            (WIDE.includes(subject.toLowerCase()) ? wide : normal).push(cardHTML(subject, files));
+        }
+        const n = Object.keys(subjects).length;
 
-        const subjects = Object.entries(driveData[year]);
-        const normalCards = [];
-        const toggleCards = [];
+        const body = n
+            ? `<div class="grid">${normal.join("")}</div>
+               ${wide.length ? `<div class="wide-list">${wide.join("")}</div>` : ""}`
+            : `<div class="year-soon">
+                   <p><strong>Zapiski so v pripravi.</strong></p>
+                   <p>Ta letnik še nima gradiva. Ko bo, se pojavi tukaj.</p>
+               </div>`;
 
-        subjects.forEach(([subject, files]) => {
-            const toggleable = toggleableSubjects.includes(subject.toLowerCase());
-            const cardHTML = createCard(subject, files, toggleable);
-            if (toggleable) toggleCards.push(cardHTML);
-            else normalCards.push(cardHTML);
-        });
-
-        section.innerHTML = `
-            <h2 class="year-title">
-                ${year} <span class="year-arrow">►</span>
-            </h2>
-            <div class="year-content">
-                <div class="grid">
-                    ${normalCards.join("")}
-                </div>
-                <div class="toggleable-container">
-                    ${toggleCards.join("")}
-                </div>
+        return `
+        <section class="year${n ? "" : " is-soon"}">
+            <div class="year-head" role="button" tabindex="0" aria-expanded="${open}">
+                <span class="year-arrow" aria-hidden="true">▸</span>
+                <span class="year-label">${esc(year)}</span>
+                <span class="year-meta">${n ? `${n} predmetov` : "kmalu"}</span>
             </div>
-        `;
+            <div class="year-body" data-open="${open}">
+                <div class="year-body-inner">${body}</div>
+            </div>
+        </section>`;
+    }).join("");
 
-        container.appendChild(section);
-    }
-
-    document.querySelectorAll(".year-title").forEach(title => {
-        title.addEventListener("click", function() {
-            const isMobilePortrait = window.innerWidth <= 600 && window.innerHeight > window.innerWidth;
-            if (!isMobilePortrait) return;
-
-            const content = this.nextElementSibling;
-            const arrow = this.querySelector(".year-arrow");
-            const isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
-
-            content.style.maxHeight = isOpen ? "0px" : "9999px";
-            arrow.textContent = isOpen ? "►" : "▼";
-        });
-    });
-
-    window.addEventListener("orientationchange", () => location.reload());
+    updateCount("");
 }
 
+/* ─── razpiranje ───────────────────────────────────────────── */
+document.addEventListener("click", e => {
+    const note = e.target.closest(".notebtn");
+    if (note) {
+        const box  = document.getElementById(note.getAttribute("aria-controls"));
+        const open = note.getAttribute("aria-expanded") === "true";
+        note.setAttribute("aria-expanded", String(!open));
+        box.dataset.open = String(!open);
+        return;
+    }
 
+    const btn = e.target.closest(".disclose");
+    if (btn) {
+        const box  = document.getElementById(btn.getAttribute("aria-controls"));
+        const open = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", String(!open));
+        box.dataset.open = String(!open);
+        return;
+    }
 
+    const head = e.target.closest(".year-head");
+    if (head) toggleYear(head);
+});
 
-document.addEventListener("click", function(e) {
-    if (e.target.classList.contains("toggle-tab")) {
-        const card = e.target.closest(".toggleable");
-        const list = card.querySelector(".file-list");
-
-        const isOpen = list.style.maxHeight && list.style.maxHeight !== "0px";
-        list.style.maxHeight = isOpen ? "0px" : "1000px";
-        e.target.textContent = isOpen ? "▼" : "▲";
+document.addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("year-head")) {
+        e.preventDefault();
+        toggleYear(e.target);
+    }
+    if (e.key === "Escape" && document.activeElement.id === "search") {
+        const s = document.getElementById("search");
+        s.value = "";
+        filter("");
     }
 });
 
-
-
-
-document.getElementById("search").addEventListener("keyup", function() {
-    const filter = this.value.toLowerCase();
-    const cards = document.querySelectorAll(".card");
-
-    cards.forEach(card => {
-        const subject = card.dataset.subject;
-        card.style.display = subject.includes(filter) ? "" : "none";
-    });
-});
-
-document.querySelectorAll("section").forEach(sec => {
-    const visible = [...sec.querySelectorAll(".card")]
-        .some(c => c.style.display !== "none");
-    sec.style.display = visible ? "" : "none";
-});
-    
-
-const toggle = document.getElementById("dark-toggle");
-
-toggle.addEventListener("change", function() {
-    document.body.classList.toggle("dark", this.checked);
-    localStorage.setItem("darkMode", this.checked);
-    document.querySelector(".slider .icon").textContent = this.checked ? "☀" : "☽";
-});
-
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
-    // only follow system if user hasn't manually set a preference
-    if (localStorage.getItem("darkMode") === null) {
-        const isDark = e.matches;
-        document.body.classList.toggle("dark", isDark);
-        toggle.checked = isDark;
-        document.querySelector(".slider .icon").textContent = isDark ? "☀" : "☽";
-    }
-});
-
-const savedMode = localStorage.getItem("darkMode");
-
-if (savedMode === null) {
-    // no saved preference, use system
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (prefersDark) {
-        document.body.classList.add("dark");
-        toggle.checked = true;
-        document.querySelector(".slider .icon").textContent = "☀";
-    }
-} else if (savedMode === "true") {
-    document.body.classList.add("dark");
-    toggle.checked = true;
-    document.querySelector(".slider .icon").textContent = "☀";
+function toggleYear(head) {
+    const body = head.nextElementSibling;
+    const open = body.dataset.open === "true";
+    body.dataset.open = String(!open);
+    head.setAttribute("aria-expanded", String(!open));
 }
 
+/* ─── iskanje ──────────────────────────────────────────────── */
+function updateCount(q) {
+    const total   = document.querySelectorAll(".card").length;
+    const visible = [...document.querySelectorAll(".card")]
+        .filter(c => c.style.display !== "none").length;
+    document.getElementById("count").textContent = q ? `${visible}/${total}` : `${total} predmetov`;
+    document.body.classList.toggle("no-results", q !== "" && visible === 0);
+}
 
+function filter(raw) {
+    const q = fold(raw.trim());
+
+    document.querySelectorAll(".card").forEach(card => {
+        card.style.display = card.dataset.search.includes(q) ? "" : "none";
+    });
+
+    document.querySelectorAll(".year").forEach(sec => {
+        const hit = [...sec.querySelectorAll(".card")].some(c => c.style.display !== "none");
+        sec.style.display = hit ? "" : "none";
+
+        /* pri iskanju razpri letnike, sicer zadetki ostanejo skriti */
+        if (q && hit) {
+            sec.querySelector(".year-body").dataset.open = "true";
+            sec.querySelector(".year-head").setAttribute("aria-expanded", "true");
+        }
+    });
+
+    updateCount(q);
+}
+
+let t;
+document.getElementById("search").addEventListener("input", function () {
+    clearTimeout(t);
+    const v = this.value;
+    t = setTimeout(() => filter(v), 80);
+});
+
+/* ─── tema ─────────────────────────────────────────────────── */
+const lamp = document.getElementById("theme");
+
+function applyTheme(dark) {
+    document.body.classList.toggle("dark", dark);
+    lamp.setAttribute("aria-pressed", String(dark));   /* pritisnjeno = luč ugasnjena */
+}
+
+const saved = localStorage.getItem("darkMode");
+applyTheme(saved === null
+    ? window.matchMedia("(prefers-color-scheme: dark)").matches
+    : saved === "true");
+
+lamp.addEventListener("click", () => {
+    const dark = lamp.getAttribute("aria-pressed") !== "true";
+    applyTheme(dark);
+    localStorage.setItem("darkMode", dark);
+});
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+    if (localStorage.getItem("darkMode") === null) applyTheme(e.matches);
+});
+
+/* ─── števci v nogi ────────────────────────────────────────── */
+(function stats() {
+    let subjects = 0, files = 0;
+    for (const year of Object.values(driveData)) {
+        for (const raw of Object.values(year)) {
+            subjects++;
+            files += Object.values(normalize(raw).files).filter(Boolean).length;
+        }
+    }
+    document.getElementById("stat-subjects").textContent = subjects;
+    document.getElementById("stat-files").textContent = files;
+})();
+
+/* ─── zagon ────────────────────────────────────────────────── */
 render();
+
+/* prehod med mobilnim in namiznim: prerisi, brez reload */
+let wasMobile = window.matchMedia("(max-width: 700px)").matches;
+window.addEventListener("resize", () => {
+    const nowMobile = window.matchMedia("(max-width: 700px)").matches;
+    if (nowMobile !== wasMobile) {
+        wasMobile = nowMobile;
+        const q = document.getElementById("search").value;
+        render();
+        if (q) filter(q);
+    }
+});
 </script>
 
-
-
-<footer>
-    <div class="footer-content">
-        <p>© 2026 Renejini EigenNotes</p>
-        <p>Zadnja posodobitev: februar 2026</p>
-        </p> Narejeno za študente fizike </p>
-        <p>
-            · 
-            <a href="https://mail.google.com/mail/?view=cm&to=rm80175@student.uni-lj.si" target="_blank">
-                rm80175@student.uni-lj.si
-            </a>
-        </p>
-        <p>
-            · 
-            <a href="discord://discordapp.com/users/renejamarn#7708" target="_blank">Discord</a>
-        </p>
-
-        <div style="height: 30px;"></div>
-
-        <img src="Favicon2.png" alt="description" width="200" height="200">
-
-    </div>
-</footer>
-    
-
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
