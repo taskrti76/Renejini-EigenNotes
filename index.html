@@ -587,37 +587,6 @@ function createCard(subject, files, toggleable = false) {
     `;
 }
 
-function render() {
-    const container = document.getElementById("content");
-    container.innerHTML = "";
-
-    for (const year in driveData) {
-        const section = document.createElement("section");
-
-        const subjects = Object.entries(driveData[year]);
-        const normalCards = [];
-        const toggleCards = [];
-
-        subjects.forEach(([subject, files]) => {
-            const toggleable = toggleableSubjects.includes(subject.toLowerCase());
-            const cardHTML = createCard(subject, files, toggleable);
-            if (toggleable) toggleCards.push(cardHTML);
-            else normalCards.push(cardHTML);
-        });
-
-        section.innerHTML = `
-            <h2 class="year-title">${year}</h2>
-            <div class="grid">
-                ${normalCards.join("")}
-            </div>
-            <div class="toggleable-container">
-                ${toggleCards.join("")}
-            </div>
-        `;
-
-        container.appendChild(section);
-    }
-}
 
 
 function render() {
@@ -665,7 +634,7 @@ function render() {
             const isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
 
             content.style.maxHeight = isOpen ? "0px" : "9999px";
-            arrow.textContent = isOpen ? "▼" : "►";
+            arrow.textContent = isOpen ? "►" : "▼";
         });
     });
 
@@ -699,6 +668,12 @@ document.getElementById("search").addEventListener("keyup", function() {
     });
 });
 
+document.querySelectorAll("section").forEach(sec => {
+    const visible = [...sec.querySelectorAll(".card")]
+        .some(c => c.style.display !== "none");
+    sec.style.display = visible ? "" : "none";
+});
+    
 
 const toggle = document.getElementById("dark-toggle");
 
@@ -740,8 +715,6 @@ render();
 
 
 
-</body>
-
 <footer>
     <div class="footer-content">
         <p>© 2026 Renejini EigenNotes</p>
@@ -753,7 +726,7 @@ render();
                 rm80175@student.uni-lj.si
             </a>
         </p>
-        </p>
+        <p>
             · 
             <a href="discord://discordapp.com/users/renejamarn#7708" target="_blank">Discord</a>
         </p>
@@ -764,6 +737,9 @@ render();
 
     </div>
 </footer>
+    
+
+</body>
 
 </html>
 
